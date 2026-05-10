@@ -181,13 +181,10 @@ def gemini_analyze(image_bytes: bytes, mime_type: str) -> dict:
             status_code=503,
             detail="GEMINI_API_KEY is not configured",
         )
-    def gemini_analyze(image_bytes: bytes, mime_type: str) -> dict:
-    key = (os.getenv("GEMINI_API_KEY") or "").strip()
-    if not key:
-        raise HTTPException(status_code=503, detail="Missing GEMINI_API_KEY")
 
     genai.configure(api_key=key)
     model = genai.GenerativeModel(GEMINI_MODEL)
+
     try:
         resp = model.generate_content(
             [
@@ -202,17 +199,20 @@ def gemini_analyze(image_bytes: bytes, mime_type: str) -> dict:
         ) from e
 
     text = (getattr(resp, "text", None) or "").strip()
+
     if not text and resp.candidates:
         parts = []
         for p in resp.candidates[0].content.parts:
             if hasattr(p, "text") and p.text:
                 parts.append(p.text)
         text = "".join(parts).strip()
+
     if not text:
         raise HTTPException(
             status_code=502,
             detail="Gemini returned an empty response",
         )
+
     try:
         raw = json.loads(_strip_json_fences(text))
     except json.JSONDecodeError as e:
@@ -220,10 +220,14 @@ def gemini_analyze(image_bytes: bytes, mime_type: str) -> dict:
             status_code=502,
             detail=f"Gemini did not return valid JSON: {e!s}",
         ) from e
-    if not isinstance(raw, dict):
-        raise HTTPException(status_code=502, detail="Gemini JSON must be an object")
-    return _normalize_gemini_payload(raw)
 
+    if not isinstance(raw, dict):
+        raise HTTPException(
+            status_code=502,
+            detail="Gemini JSON must be an object",
+        )
+
+    return _normalize_gemini_payload(raw)
 
 @app.post("/analyze-food-image")
 async def analyze_food_image(file: UploadFile = File(...)):
