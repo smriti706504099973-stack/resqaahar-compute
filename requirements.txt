@@ -1,10 +1,17 @@
-# Pillow 10.x has no Windows wheels for Python 3.14 (pip builds from source → zlib errors).
-# Use Pillow 11.2+ for cp314 wheels, or use Python 3.11–3.13 for broadest compatibility.
-fastapi==0.115.6
-uvicorn[standard]==0.32.1
-python-dotenv>=1.0.1
-python-multipart==0.0.17
-pillow>=11.2.0,<13
-httpx==0.28.1
-requests==2.32.3
-google-generativeai==0.8.3
+annotated-doc==0.0.4
+annotated-types==0.7.0
+anyio==4.13.0
+click==8.3.3
+colorama==0.4.6
+fastapi==0.136.1
+git-filter-repo==2.47.0
+gunicorn==26.0.0
+h11==0.16.0
+idna==3.13
+packaging==26.2
+pydantic==2.13.4
+pydantic_core==2.46.4
+starlette==1.0.0
+typing-inspection==0.4.2
+typing_extensions==4.15.0
+uvicorn==0.46.0
