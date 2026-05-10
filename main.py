@@ -5,11 +5,6 @@ import json
 import os
 import re
 from datetime import datetime, timedelta, timezone
-
-from dotenv import load_dotenv
-
-load_dotenv()
-
 import google.generativeai as genai
 import requests
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
@@ -22,7 +17,8 @@ app = FastAPI(title="ResQaahar Compute")
 AMRITSAR_LAT = 31.6340
 AMRITSAR_LON = 74.8723
 
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
+OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY", "").strip()
 
 GEMINI_PROMPT = """You are an AI for a food rescue app in India. Analyze this food image. You must return ONLY a valid JSON object matching this schema: {"items": [{"name": "string", "qty": "number or descriptive string"}], "requires_refrigeration": boolean}. Do not include markdown formatting or backticks in the response."""
 
@@ -185,6 +181,11 @@ def gemini_analyze(image_bytes: bytes, mime_type: str) -> dict:
             status_code=503,
             detail="GEMINI_API_KEY is not configured",
         )
+    def gemini_analyze(image_bytes: bytes, mime_type: str) -> dict:
+    key = (os.getenv("GEMINI_API_KEY") or "").strip()
+    if not key:
+        raise HTTPException(status_code=503, detail="Missing GEMINI_API_KEY")
+
     genai.configure(api_key=key)
     model = genai.GenerativeModel(GEMINI_MODEL)
     try:
